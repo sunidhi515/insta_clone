@@ -1,23 +1,51 @@
-import logo from './logo.svg';
 import './App.css';
-
+import React, {useState} from 'react';
+import Post from './Post';
 function App() {
+                  const [posts, setPosts]= useState([
+                   { username:"sunidhi",
+                    caption:"hey" ,
+                    imageUrl:"../sunset.jpg"
+                  },
+                  {username:"riteek" ,
+                  caption:" i m poop",
+                  
+                imageUrl:"../riteek.jpg"
+              },
+              {username:"riteek" ,
+              caption:" i m poop",
+              
+            imageUrl:"../sunset.jpg"
+          },
+          {username:"riteek" ,
+          caption:" i m poop",
+          
+        imageUrl:"../sunset.jpg"
+      }
+                  ]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {/* {Header} */}
+      <div className="app__header">
+        <img className="app__headerImage" 
+        src="../insta.png"
+        alt= " "
+        />
+
+       
+      </div>
+            { posts.map(post=>(
+                <Post username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
+            ))
+}
+
+
+
+
+
+      {/* {Post} */}
+      {/* {Post} */}
     </div>
   );
 }
