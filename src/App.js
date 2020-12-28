@@ -5,7 +5,7 @@ import { db,auth } from './firebase';
 import {makeStyles} from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { Button,Input } from '@material-ui/core';
-
+import ImageUpload from './ImageUpload';
 
 function getModalStyle() {
   const top = 50 ;
@@ -40,8 +40,26 @@ function App() {
                   const [username,setUsername]= useState('');
 
                   const [password,setPassword]= useState('');
-
+                  const [openSignIn, setOpenSignIn] = useState(false);
                   const [email,setEmail]= useState('');
+                  const [user,setUser]= useState(null);
+
+         useEffect(()=> {   
+             const unsubscribe = auth.onAuthStateChanged((authUser)=> {       //listens any time any change occurs and fires authUser
+               if(authUser)      //if authUser is fired
+               { setUser(authUser);     //user has logged in or authuser is the user
+
+               }
+
+   
+               else
+               { setUser(null);}  //user has logged out
+             })
+             return () =>{
+               unsubscribe();     //perform some cleanup act before useEffect runs again if may be 10 users sign up
+             }
+
+         },[user,username]); //*
 
 
       useEffect(() =>{
@@ -51,13 +69,36 @@ function App() {
       },[]);
       const signUp = (event)=>{
         event.preventDefault();
-        auth.createUserWithEmailAndPassword(email,password)
+        auth.createUserWithEmailAndPassword(email,password)  //for successful signup
+        .then((authUser)=>{
+        return   authUser.user.updateProfile({
+            displayName : username
+          })
+        })
         .catch((error)=>alert(error.message))
+
+        setOpen(false);
+      }
+
+
+      const signIn = (event)=>{
+        event.preventDefault();
+        auth
+        .signInWithEmailAndPassword(email,password)
+        .catch((error)=>alert(error.message));
+
+        setOpenSignIn(false);
       }
 
 
   return (
     <div className="App">
+
+
+<ImageUpload/>
+
+
+
 
 
 <Modal
@@ -70,30 +111,65 @@ function App() {
            src=""
            alt=""/>
 
-<input placeholder="username"
+<Input placeholder="username"
                   type="text"
                   value={username}
                   onChange={(e) =>setUsername(e.target.value)}
                   />
 
-           <input placeholder="email"
+           <Input placeholder="email"
                   type="text"
                   value={email}
                   onChange={(e) =>setEmail(e.target.value)}
                   />
-           <input   placeholder="password"
+           <Input   placeholder="password"
                   type="password"
                   value={password}
                   onChange={(e) =>setPassword(e.target.value)}
                   />  
 
-    <Button  type="submit"  onclick={signUp}>signup</Button>
+    <Button  type="submit"  onClick={signUp}>signup</Button>
 
                </centre></form>
   </div>
 
   
 </Modal>
+
+
+
+
+<Modal
+  open={openSignIn}
+  onClose={()=>setOpenSignIn(false)}
+  > 
+  <div style={modalStyle} className={classes.paper}>
+  <form className="app__signUp"><centre>
+      <img className="app_headerImage"
+           src=""
+           alt=""/>
+
+
+
+           <Input placeholder="email"
+                  type="text"
+                  value={email}
+                  onChange={(e) =>setEmail(e.target.value)}
+                  />
+           <Input   placeholder="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) =>setPassword(e.target.value)}
+                  />  
+
+    <Button  type="submit"  onClick={signIn}>signin</Button>
+
+               </centre></form>
+  </div>
+
+  
+</Modal>
+
 
       
       {/* {Header} */}
@@ -103,8 +179,16 @@ function App() {
         alt= " "
         />
 
-       <Button onClick={()=>setOpen(true)}>sign up</Button>
+       
       </div>
+
+          { user ? (<Button onClick={()=>auth.signOut()}>log out</Button>) : //to logout
+
+         ( <div>
+          <Button onClick={()=>setOpenSignIn(true)}>sign in</Button>
+          <Button onClick={()=>setOpen(true)}>sign up</Button>
+          </div> 
+          )}
             { posts.map(({id,post})=>(
                 <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
             ))
