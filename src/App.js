@@ -6,6 +6,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { Button,Input } from '@material-ui/core';
 import ImageUpload from './ImageUpload';
+import InstagramEmbed from 'react-instagram-embed';
 
 function getModalStyle() {
   const top = 50 ;
@@ -63,7 +64,7 @@ function App() {
 
 
       useEffect(() =>{
-        db.collection('posts').onSnapshot(snapshot =>{
+        db.collection('posts').orderBy('timestamp','desc').onSnapshot(snapshot =>{       //so that the newly uploaded photo is put to the top
                 setPosts(snapshot.docs.map((doc)=>({id:doc.id, post : doc.data()})))
         })
       },[]);
@@ -95,7 +96,6 @@ function App() {
     <div className="App">
 
 
-<ImageUpload/>
 
 
 
@@ -178,24 +178,28 @@ function App() {
         src="../insta.png"
         alt= " "
         />
+ { user ? (<Button onClick={()=>auth.signOut()}>log out</Button>) : //to logout
 
+( <div>
+ <Button onClick={()=>setOpenSignIn(true)}>sign in</Button>
+ <Button onClick={()=>setOpen(true)}>sign up</Button>
+ </div> 
+ )}
        
       </div>
 
-          { user ? (<Button onClick={()=>auth.signOut()}>log out</Button>) : //to logout
-
-         ( <div>
-          <Button onClick={()=>setOpenSignIn(true)}>sign in</Button>
-          <Button onClick={()=>setOpen(true)}>sign up</Button>
-          </div> 
-          )}
-            { posts.map(({id,post})=>(
+         
+           <div className="app_posts">
+           { posts.map(({id,post})=>(
                 <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
             ))
 }
+           </div>
 
 
-
+{user?.displayName ? (
+<ImageUpload username={user.displayName}/>) :
+(<h3>sorry you need to login first</h3> )   }
 
 
       {/* {Post} */}
@@ -203,5 +207,22 @@ function App() {
     </div>
   );
 }
+
+
+<div>
+  <InstagramEmbed
+                      url='https://instagr.am/p/Zw9o4/'
+                      clientAccessToken='123|456'
+                      maxWidth={320}
+                      hideCaption={false}
+                      containerTagName='div'
+                      protocol=''
+                      injectScript
+                      onLoading={() => {}}
+                      onSuccess={() => {}}
+                      onAfterRender={() => {}}
+                      onFailure={() => {}}
+         />
+</div>
 
 export default App;
